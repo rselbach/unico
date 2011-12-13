@@ -3,6 +3,8 @@ Unico
 
 Sends public activities from Google+ to Twitter and Facebook.
 
+See it in action: http://unico.robteix.com
+
 Libraries
 ---------
 
