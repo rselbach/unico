@@ -138,12 +138,12 @@ func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.
 			attachment = obj.Attachments[0]
 			kind = attachment.ObjectType
 		}
-		content = removeTags(obj.Content)
+		content = obj.Content
 	}
 	if act.Annotation != "" {
 		content = act.Annotation
 	}
-
+	content = removeTags(content)
 	var err os.Error
 	switch kind {
 	case "status":
