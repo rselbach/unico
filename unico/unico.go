@@ -208,6 +208,7 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 	activityFeed, err := p.Activities.List(user.Id, "public").MaxResults(5).Do()
 	if err != nil {
 		c.Debugf("syncStream: activity fetch failed for %s. Err: %v\n", user.Id, err)
+		return
 	}
 
 	for _, act := range activityFeed.Items {
