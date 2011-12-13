@@ -46,9 +46,8 @@ func googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	tr.Transport = &urlfetch.Transport{Context: c}
 	if _, err := tr.Exchange(code); err != nil {
 		serveError(c, w, err)
-		                return
-				        }
-
+		return
+	}
 
 	// get info on the user
 	httpClient := tr.Client()
