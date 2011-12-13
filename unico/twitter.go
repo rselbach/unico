@@ -55,7 +55,6 @@ func twitterVerify(w http.ResponseWriter, r *http.Request) {
 		Token:     tok,
 		Transport: &urlfetch.Transport{Context: c}}
 
-
 	tt := &tweetlib.TempToken{Token: token, Secret: secret}
 	tok, err := tr.AccessToken(tt, verifier)
 	if err != nil {
@@ -91,16 +90,14 @@ func signInTwitterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	conf := &tweetlib.Config{
-		                ConsumerKey:    appConfig.TwitterConsumerKey,
-				                ConsumerSecret: appConfig.TwitterConsumerSecret,
-						Callback: "http://" + appConfig.AppHost + "/twitter?action=temp&id=" + id}
-						        tok := &tweetlib.Token{}
-							        tr := &tweetlib.Transport{Config: conf,
-								                Token:     tok,
-										                Transport: &urlfetch.Transport{Context: c}}
-
+		ConsumerKey:    appConfig.TwitterConsumerKey,
+		ConsumerSecret: appConfig.TwitterConsumerSecret,
+		Callback:       "http://" + appConfig.AppHost + "/twitter?action=temp&id=" + id}
+	tok := &tweetlib.Token{}
+	tr := &tweetlib.Transport{Config: conf,
+		Token:     tok,
+		Transport: &urlfetch.Transport{Context: c}}
 
 	tt, err := tr.TempToken()
 	if err != nil {
@@ -122,17 +119,15 @@ func signInTwitterHandler(w http.ResponseWriter, r *http.Request) {
 func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.Activity, user *User) {
 	c := appengine.NewContext(r)
 
-	 conf := &tweetlib.Config{
-		                                 ConsumerKey:    appConfig.TwitterConsumerKey,
-						                                                 ConsumerSecret: appConfig.TwitterConsumerSecret}
-																		 tok := &tweetlib.Token{OAuthToken: user.TwitterOAuthToken, OAuthSecret: user.TwitterOAuthSecret}
-																									                                                                 tr := &tweetlib.Transport{Config: conf,
-																																	                                                                                 Token:     tok,
-																																											                                                                                                 Transport: &urlfetch.Transport{Context: c}}
+	conf := &tweetlib.Config{
+		ConsumerKey:    appConfig.TwitterConsumerKey,
+		ConsumerSecret: appConfig.TwitterConsumerSecret}
+	tok := &tweetlib.Token{OAuthToken: user.TwitterOAuthToken, OAuthSecret: user.TwitterOAuthSecret}
+	tr := &tweetlib.Transport{Config: conf,
+		Token:     tok,
+		Transport: &urlfetch.Transport{Context: c}}
 
-	
-																																																							 tl, _ := tweetlib.New(tr.Client())
-
+	tl, _ := tweetlib.New(tr.Client())
 
 	var attachment *plus.ActivityObjectAttachments
 	obj := act.Object
