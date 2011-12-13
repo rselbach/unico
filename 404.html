@@ -1,32 +1,27 @@
 {{define "404"}}
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<title>Unico - social network sync</title>
-<!--[if IE]>
-<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]-->
-<style>
-  article, aside, details, figcaption, figure, footer, header,
-  hgroup, menu, nav, section { display: block; }
-</style>
-</head>
-<body>
-<h1>404 Not Found</h1>
+{{template "header"}}
+<div class="page-header">
+  <h1>404 Not Found <small>That's not here...</small></h1>
+</div>
 
-<p>That's a bit embarrassing, isn't it? I wonder what you were looking for
-here... whatever it was, it's not here. So sorry.</p>
+<div class="alert-message error">
+  
+  <p>That's a bit embarrassing, isn't it? I wonder what you were
+  looking for here... whatever it was, it's not here.</p>
+</div>
 
-<p>All is not lost though! You might just have been lucky enough to 
-accidentally arrive at the right place. Well, almost the right place...
-you know what I mean. Have you ever been annoyed of having to 
-maintain several social networks? OMG ME TOO!!</p>
+<div class="row">
+  <div class="span16">
+    <p>So sorry&hellip;</p>
 
-<p><a href="/">Unico</a> copies your public statuses from 
-<a href="http://plus.google.com">Google+</a> into other social networks.
-Just <a href="/">Click here</a> to solve all of your problems forever!.</p>
+    <p>All is not lost though! You might just have been lucky enough
+    to accidentally arrive at the right place. Well, almost the right
+    place... you know what I mean.</p>
 
-</body>
-</html>
+    <p>Have you ever been annoyed of having to maintain several social
+    networks? OMG ME TOO!!</p><p>Take a look at <a href="/">Unico</a>
+    and solve this problem!</p>
+  </div>
+</div>
+{{template "footer"}}
 {{end}}

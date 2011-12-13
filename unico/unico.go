@@ -39,6 +39,8 @@ var (
 	templates = template.SetMust(template.ParseSetFiles(
 		"404.html",
 		"home.html",
+		"header.html",
+		"footer.html",
 		"error.html"))
 )
 

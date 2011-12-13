@@ -1,22 +1,13 @@
 {{define "error"}}
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<title>Unico - social network sync</title>
-<!--[if IE]>
-<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]-->
-<style>
-  article, aside, details, figcaption, figure, footer, header,
-  hgroup, menu, nav, section { display: block; }
-</style>
-</head>
-<body>
-<h1>Unico</h1>
+{{template "header"}}
 
-<p>Error: {{.}}</p>
+<div class="page-header">
+  <h1>Error! <small>Embarrassing, ins't it?</small></h1>
+</div>
 
-</body>
-</html>
+<div class="alert-message error">
+  <p><strong>Error:</strong> {{.}}</p>
+</div>
+
+{{template "footer"}}
 {{end}}

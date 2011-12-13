@@ -1,0 +1,110 @@
+{{define "header"}}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Unico - social network sync</title>
+    
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+    
+    <!-- Le styles -->
+    
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+    <script src="/static/bootstrap-modal.js"></script>
+    <script src="/static/bootstrap-buttons.js"></script>
+    <script type="text/javascript">
+      WebFontConfig = {
+      google: { families: [ 'Cousine:400,400italic,700,700italic:latin' ] }
+      };
+      (function() {
+      var wf = document.createElement('script');
+      wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+      '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+      wf.type = 'text/javascript';
+      wf.async = 'true';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(wf, s);
+      })(); </script>
+    
+    <!-- Le styles -->
+    <link href="/static/bootstrap.css" rel="stylesheet">
+    
+    <style type="text/css">
+      body {
+      font-family: Cousine, sans-serif;
+      font-size: 11px;
+      }
+      
+      .masthead {
+      background-color: #049CD9;
+      background-image: -moz-linear-gradient(#004D9F, #049CD9);
+      background-repeat: no-repeat;
+      color: white;
+      }
+      .jumbotron h1 {
+      color: white;
+      font-size: 34px;
+      line-height: 1;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      }
+      .jumbotron .inner {
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) inset;
+      padding: 45px 0;
+      }
+      
+      .btn.smaller {
+      font-size: 10px;
+      padding: 3px 7px;
+      margin-top: 10px;
+      }
+      div.warning li { color: black; }
+    </style>
+    
+    <style>
+      article, aside, details, figcaption, figure, footer, header,
+      hgroup, menu, nav, section { display: block; }
+    </style>
+    
+  </head>
+  <body>
+    
+    <div class="topbar">
+      <div class="fill">
+        <div class="container">
+          <a class="brand" href="/">Unico</a>
+          <ul class="nav">
+            <li class="active"><a href="/">Home</a></li>
+            <li><a href="mailto:r@robteix.com">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    
+    <!-- Masthead (blueprinty thing)
+         ================================================== -->
+    
+    <header class="jumbotron masthead" id="overview">
+      <div class="inner">
+	<div class="container">
+	  <h1>Unico, the ultimate social network sync</h1>
+	  <p class="lead">
+	    <strong>Unico</strong> sends your <strong>public</strong>
+	    Google+ activities to other social networks
+	    intelligently.</p>
+          
+	</div><!-- /container -->
+      </div>
+    </header>
+    
+    
+    
+    
+    <div class="container">
+      
+	<div class="content">
+
+{{end}}

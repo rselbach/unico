@@ -1,160 +1,66 @@
 {{define "home"}}
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Unico - social network sync</title>
 
-    <!--[if lt IE 9]>
-	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
+{{template "header"}}
 
-    <!-- Le styles -->
-
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
-    <script src="/static/bootstrap-modal.js"></script>
-    <script src="/static/bootstrap-buttons.js"></script>
-<script type="text/javascript">
-  WebFontConfig = {
-    google: { families: [ 'Cousine:400,400italic,700,700italic:latin' ] }
-  };
-  (function() {
-    var wf = document.createElement('script');
-    wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
-      '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-    wf.type = 'text/javascript';
-    wf.async = 'true';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(wf, s);
-  })(); </script>
-
-    <!-- Le styles -->
-    <link href="/static/bootstrap.css" rel="stylesheet">
-
-    <style type="text/css">
-	body {font-family: Cousine, sans-serif; font-size: 11px;}
-      .masthead {
-      background-color: #049CD9;
-      background-image: -moz-linear-gradient(#004D9F, #049CD9);
-      background-repeat: no-repeat;
-      color: white;
-      }
-      .jumbotron h1 {
-      color: white;
-      font-size: 34px;
-      line-height: 1;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-      }
-      .jumbotron .inner {
-      /*background: url("../img/grid-18px.png") repeat scroll center top transparent;*/
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) inset;
-      padding: 45px 0;
-      }
-
-      .btn.smaller {
-	      font-size: 10px;
-	      padding: 3px 7px;
-	      margin-top: 10px;
-      }
-      div.warning li { color: black; }
-    </style>
-
-
-
-
-
-
-    <style>
-      article, aside, details, figcaption, figure, footer, header,
-      hgroup, menu, nav, section { display: block; }
-    </style>
-
-  </head>
-  <body>
-
-    <div class="topbar">
-      <div class="fill">
-        <div class="container">
-          <a class="brand" href="/">Unico</a>
-          <ul class="nav">
-            <li class="active"><a href="/">Home</a></li>
-            <li><a href="mailto:r@robteix.com">Contact</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- Masthead (blueprinty thing)
-         ================================================== -->
-
-    <header class="jumbotron masthead" id="overview">
-      <div class="inner">
-	<div class="container">
-	  <h1>Unico, the ultimate social network sync</h1>
-	  <p class="lead">
-	  <strong>Unico</strong> sends your <strong>public</strong> Google+ activities to other social networks intelligently.</p>
-
-	</div><!-- /container -->
-      </div>
-    </header>
-
-
-
-
-    <div class="container">
-
-      <div class="content">
         <div class="page-header">
-
-          <h1>About Unico <small>Enabling it, disabling, and more</small></h1>
+          
+          <h1>About Unico <small>Enabling it, disabling, and
+          more</small></h1>
 	</div>
 
 	<div class="alert-message error">
-                   <p><strong>Unico</strong> is an <strong>coding experiment</strong>, not a real product. Feel free to use it if you will,
-	              but be warned that as an experiment, it can be terminated at any moment. Also, changes can occur <strong>without prior
-													                        notice</strong> that affect how
-															it works. <strong>USE IT AT YOUR OWN RISK</strong>.</p>
+          <p><strong>Unico</strong> is an <strong>coding
+	  experiment</strong>, not a real product. Feel free to use it
+	  if you will, but be warned that as an experiment, it can be
+	  terminated at any moment. Also, changes can
+	  occur <strong>without prior notice</strong> that affect how
+	  it works. <strong>USE IT AT YOUR OWN RISK</strong>.</p>
 	</div>
 
 	<div class="alert-message warning">
-		<p>Hi there! A few more points to have in mind before you use Unico:</p>
-		<ul>
-		<li><strong>No</strong> passwords are stored. Everything uses OAuth.</li>
+	  <p>Hi there! A few more points to have in mind before you
+	  use Unico:</p>
+	  <ul>
+	    <li><strong>No</strong> passwords are stored. Everything
+	    uses OAuth.</li>
 		
-		<li>Unico was created to scratch a particular itch for its author and even though Unico is not a secret, I'm also not
-		trying to actively spread the word about it. Please don't go posting about Unico, because if too many people sign up, 
-		I may have to implement use controls and I really don't want to do that. :)</li>
+	    <li>Unico was created to scratch a particular itch for its
+	    author and even though Unico is not a secret, I'm also not
+	    trying to actively spread the word about it. Please don't
+	    go posting about Unico, because if too many people sign
+	    up, I may have to implement use controls and I really
+	    don't want to do that. :)</li>
 
-		<li>Due to limits in the Google+ API, Unico is not able to access posts shared with Circles. Only <strong>public</strong>
-		posts are available.</li>
+	    <li>Due to limits in the Google+ API, Unico is not able to
+		access posts shared with Circles.
+		Only <strong>public</strong> posts are available.</li>
 
-		<li>If you have problems or suggestions, use the Contact link above. Enjoy it ;)</li>
-	</ul>
-			        </div>
-
+	    <li>If you have problems or suggestions, use the Contact
+	    link above. Enjoy it ;)</li>
+	  </ul>
+	</div>
+        
 	<div class="row">
 	  <div class="span-one-third">
 	    <h3>Google+ {{if .googleid}}<span class="label success">Connected</span>{{else}}<span class="label important">Not Connected</span>{{end}}</h3>
 	    {{if .googleid}}
 	    <p><img src="{{.googleimg|html}}" align="left" style="margin-right: 3px;"> {{.googlename|html}}<br>
-	    <button style="padding: 3px 7px; margin-top: 10px;" data-controls-modal="modal-delete" data-backdrop="true" data-keyboard="true" class="btn smaller danger">Delete Account</button></p>
+	      <button style="padding: 3px 7px; margin-top: 10px;" data-controls-modal="modal-delete" data-backdrop="true" data-keyboard="true" class="btn smaller danger">Delete Account</button></p>
 	    {{else}}
 	    <p>First you need to connect with Google. <a href="/loginGoogle">Click here to do so</a></p>
 	    {{end}}
-
+            
 	  </div>
-
+          
 	  <div class="span-one-third" {{if .googleid}}{{else}}style="filter: alpha(opacity=10); opacity: 0.1;"{{end}}>
 	    <h3>Twitter {{if .twitterid}}<span class="label success">Sharing</span>{{else}}<span class="label important">Not Sharing</span>{{end}}</h3>
 	    {{if .twitterid}}
-
+            
 	    <p><img align="left" src="{{.pic|html}}" style="margin-right: 5px"> {{.twittername|html}}<br>
-	    <a class="btn smaller" href="/deleteTwitter">Stop sharing to Twitter</a></p>
-
+	      <a class="btn smaller" href="/deleteTwitter">Stop sharing to Twitter</a></p>
+            
 	    {{else}}
-
+            
 	    {{if .googleid}}<a href="/twitter?action=init&id={{.googleid|html}}">{{end}}
 	      <img alt="Sign in with Twitter" src="/static/sign-in-with-twitter-d.png">{{if .googleid}}</a>{{end}}
 
@@ -173,30 +79,7 @@
 
 	    {{end}}
 
-	  </div>
-	</div>
-	<footer>
-	<p>&copy; 2011 <a href="https://raw.github.com/robteix/unico/master/AUTHORS">The Unico Authors</a>.</p>
-	</footer>
+    </div>
 
-      </div> <!-- /container -->
-
-
-      <div id="modal-delete" class="modal hide fade">
-	<div class="modal-header">
-	  <a href="#" class="close">x</a>
-	  <h3>Delete Account</h3>
-	</div>
-	<div class="modal-body">
-		<p>Are you sure you want to delete your account? If you continue, your
-		social network account relationships will be lost and sharing will stop.</p>
-	</div>
-	<div class="modal-footer">
-	  <a href="#" class="btn primary">No, don't delete it</a>
-	  <a href="/deleteAccount" class="btn secondary">Yes, delete it!</a>
-	</div>
-      </div>
-
-  </body>
-</html>
+{{template "footer"}}
 {{end}}
