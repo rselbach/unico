@@ -105,7 +105,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	c.Debugf("loadUser: %v\n", user)
 	if user.Id != "" {
-		if session, err := sessions.Session(r, "", "memcache"); err == nil {
+		if session, err := sessions.Session(r, "", "datastore"); err == nil {
 			session["userID"] = user.Id
 			f := sessions.Save(r, w)
 			c.Debugf("saveSession: %v\n", f)
@@ -242,9 +242,13 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 func deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "memcache")
+	session, err := sessions.Session(r, "", "datastore")
+	c1:= appengine.NewContext(r)
+	c1.Debugf("deleteAccount: id=%v, session=%v, err=%v\n", session["userID"], session, err)
 	if err == nil {
+		if session["userID"] != nil {
 		id = session["userID"].(string)
+		}
 	}
 	if id != "" {
 		user := loadUser(r, id)
@@ -265,7 +269,7 @@ func deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "memcache")
+	session, err := sessions.Session(r, "", "datastore")
 	if err == nil {
 		c := appengine.NewContext(r)
 		c.Debugf("session: %v\n",  session)
@@ -284,7 +288,7 @@ func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 func deleteFacebookHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "memcache")
+	session, err := sessions.Session(r, "", "datastore")
 	if err == nil {
 		id = session["userID"].(string)
 	}
