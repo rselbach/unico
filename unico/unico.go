@@ -45,6 +45,7 @@ var (
 )
 
 func init() {
+	// Read configuration file
 	content, err := ioutil.ReadFile("config.json")
 	if err == nil {
 		err = json.Unmarshal(content, &appConfig)
@@ -80,6 +81,7 @@ func init() {
 
 }
 
+// Displays the home page. 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if appConfig.AppHost == "" {
 		appConfig.AppHost = r.Host
@@ -90,12 +92,12 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//serveError(c, w, err)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	//user := loadUser(r, user.Current(c).Id)
 	params := make(map[string]string)
 
+	// Look for a browser cookie containing the user id
+	// We can use this to load the user information
 	userCookie, err := r.Cookie("userId")
 	var user User
 	if err == nil {
@@ -103,7 +105,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.Id != "" {
-		if session, err := sessions.Session(r, "", "datastore"); err == nil {
+		if session, err := sessions.Session(r, "", "memcache"); err == nil {
 			session["userID"] = user.Id
 			sessions.Save(r, w)
 		}
@@ -238,7 +240,7 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 func deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "datastore")
+	session, err := sessions.Session(r, "", "memcache")
 	if err == nil {
 		id = session["userID"].(string)
 	}
@@ -259,7 +261,7 @@ func deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "datastore")
+	session, err := sessions.Session(r, "", "memcache")
 	if err == nil {
 		id = session["userID"].(string)
 	}
@@ -276,7 +278,7 @@ func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 func deleteFacebookHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "datastore")
+	session, err := sessions.Session(r, "", "memcache")
 	if err == nil {
 		id = session["userID"].(string)
 	}
