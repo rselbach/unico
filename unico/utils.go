@@ -12,19 +12,17 @@ import (
 	"os"
 	"regexp"
 	"time"
-	
+
 	"appengine"
 	"appengine/datastore"
 	"appengine/memcache"
-	)
-
+)
 
 var (
 	reParagraphs = regexp.MustCompile("</p>")
-	reBreaks = regexp.MustCompile("<br */?>")
-	reTags = regexp.MustCompile("<[^>]+>")
-	)
-
+	reBreaks     = regexp.MustCompile("<br */?>")
+	reTags       = regexp.MustCompile("<[^>]+>")
+)
 
 // 1. convert </p> to new line
 // 2. convert <br/> to new line
