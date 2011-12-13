@@ -105,7 +105,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.Id != "" {
-		if session, err := sessions.Session(r, "", "memcache"); err == nil {
+		if session, err := sessions.Session(r, "", "datastore"); err == nil {
 			session["userID"] = user.Id
 			sessions.Save(r, w)
 		}
@@ -240,7 +240,7 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 func deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "memcache")
+	session, err := sessions.Session(r, "", "datastore")
 	if err == nil {
 		id = session["userID"].(string)
 	}
@@ -261,8 +261,10 @@ func deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "memcache")
+	session, err := sessions.Session(r, "", "datastore")
 	if err == nil {
+		c := appengine.NewContext(r)
+		c.Debugf("session: %v\n",  session)
 		id = session["userID"].(string)
 	}
 	if id != "" {
@@ -278,7 +280,7 @@ func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 func deleteFacebookHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "memcache")
+	session, err := sessions.Session(r, "", "datastore")
 	if err == nil {
 		id = session["userID"].(string)
 	}
