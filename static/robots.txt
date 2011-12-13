@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /twitter
+Disallow: /loginGoogle
+Disallow: /oauth2callback
+Disallow: /fb
+Disallow: /sync
+Disallow: /deleteAccount
+Disallow: /deleteFacebook
+Disallow: /deleteTwitter

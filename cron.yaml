@@ -1,0 +1,4 @@
+cron:
+- description: sync worker
+  url: /sync
+  schedule: every 3 minutes
