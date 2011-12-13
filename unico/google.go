@@ -65,9 +65,10 @@ func googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{Name: "userId", Value: person.Id, Domain: appConfig.AppDomain, Path: "/", MaxAge: 30000000 /* about a year */ }
 	http.SetCookie(w, cookie)
 
-	if session, err := sessions.Session(r, "", "datastore"); err == nil {
+	if session, err := sessions.Session(r, "", "memcache"); err == nil {
 		session["userID"] = person.Id
-		sessions.Save(r, w)
+		f := sessions.Save(r, w)
+		c.Debugf("callback: sessionSave: %v\n", f)
 	}
 
 	user := loadUser(r, person.Id)

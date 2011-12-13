@@ -103,11 +103,12 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		user = loadUser(r, userCookie.Value)
 	}
-
+	c.Debugf("loadUser: %v\n", user)
 	if user.Id != "" {
-		if session, err := sessions.Session(r, "", "datastore"); err == nil {
+		if session, err := sessions.Session(r, "", "memcache"); err == nil {
 			session["userID"] = user.Id
-			sessions.Save(r, w)
+			f := sessions.Save(r, w)
+			c.Debugf("saveSession: %v\n", f)
 		}
 
 		if user.TwitterId != "" {
@@ -151,6 +152,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			tr.Transport = &urlfetch.Transport{Context: c}
 			p, _ := plus.New(tr.Client())
 			person, err := p.People.Get(user.Id).Do()
+			c.Debugf("Home people get: %v,(%v)\n", person, err)
 			if err == nil {
 				mu.Image = person.Image.Url
 				mu.Name = person.DisplayName
@@ -240,7 +242,7 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 func deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "datastore")
+	session, err := sessions.Session(r, "", "memcache")
 	if err == nil {
 		id = session["userID"].(string)
 	}
@@ -252,6 +254,8 @@ func deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 			datastore.Delete(c, key)
 			session["userID"] = ""
 			sessions.Save(r, w)
+			memUserDelete(c, user.Id)
+			memcache.Delete(c, "user" + user.Id)
 			http.SetCookie(w, &http.Cookie{Name: "userId", Value: "", Domain: appConfig.AppDomain, Path: "/", MaxAge: -1})
 		}
 	}
@@ -261,7 +265,7 @@ func deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "datastore")
+	session, err := sessions.Session(r, "", "memcache")
 	if err == nil {
 		c := appengine.NewContext(r)
 		c.Debugf("session: %v\n",  session)
@@ -280,7 +284,7 @@ func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 func deleteFacebookHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := ""
-	session, err := sessions.Session(r, "", "datastore")
+	session, err := sessions.Session(r, "", "memcache")
 	if err == nil {
 		id = session["userID"].(string)
 	}

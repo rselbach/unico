@@ -91,3 +91,7 @@ func memUser(c appengine.Context, id string) (mu MemoryUser) {
 func memUserSave(c appengine.Context, id string, mu MemoryUser) {
 	memcache.JSON.Set(c, &memcache.Item{Key: "memuser" + id, Object: mu})
 }
+
+func memUserDelete(c appengine.Context, id string) {
+	memcache.Delete(c, "memuser" + id)
+}

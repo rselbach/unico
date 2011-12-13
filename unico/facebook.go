@@ -21,7 +21,7 @@ func fbHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	id := "" //r.FormValue("id")
 
-	if session, err := sessions.Session(r, "", "datastore"); err == nil {
+	if session, err := sessions.Session(r, "", "memcache"); err == nil {
 		id = session["userID"].(string)
 	}
 
