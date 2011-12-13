@@ -124,8 +124,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 					Transport: &urlfetch.Transport{Context: c}}
 
 				tl, _ := tweetlib.New(tr.Client())
-				u, _ := tl.Users.Show().UserId(user.TwitterId).Do()
-				if u != nil {
+				u, err := tl.Users.Show().UserId(user.TwitterId).Do()
+				if err == nil {
 					params["pic"] = u.ProfileImageUrl
 					memcache.Add(c, &memcache.Item{Key: "pic" + user.Id, Value: []byte(u.ProfileImageUrl)})
 				}
