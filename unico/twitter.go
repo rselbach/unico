@@ -131,24 +131,37 @@ func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.
 
 	var attachment *plus.ActivityObjectAttachments
 	obj := act.Object
-	kind := "status"
-	content := act.Title
-	if obj != nil {
-		if len(obj.Attachments) > 0 {
-			attachment = obj.Attachments[0]
-			kind = attachment.ObjectType
-		}
-		content = obj.Content
-	}
-	if act.Annotation != "" {
+	kind := ""
+	content := ""
+
+	if act.Verb == "share" {
 		content = act.Annotation
+		if content == "" {
+			content = "Resharing " + obj.Actor.DisplayName
+		}
+		kind = "status_share"
+	} else {
+		if obj != nil {
+			if len(obj.Attachments) > 0 {
+				attachment = obj.Attachments[0]
+				kind = attachment.ObjectType
+			}
+			content = obj.Content
+		} else {
+			content = act.Title
+		}
+
 	}
 	content = removeTags(content)
+
+	c.Debugf("Post (%s):\n\tkind: %s\n\tcontent: %s\n", user.TwitterId, kind, content)
 	var err os.Error
 	switch kind {
 	case "status":
 		// post a status update
 		_, err = tl.Tweets.Update(shorten(140, content, act.Url)).Do()
+	case "status_share":
+		_, err = tl.Tweets.Update(shortenLink(140, content, act.Url)).Do()
 	case "article":
 		// post a link
 		_, err = tl.Tweets.Update(shortenLink(140, content, attachment.Url)).Do()

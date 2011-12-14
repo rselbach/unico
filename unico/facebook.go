@@ -67,32 +67,43 @@ func publishActivityToFacebook(w http.ResponseWriter, r *http.Request, act *plus
 
 	var attachment *plus.ActivityObjectAttachments
 	obj := act.Object
-	kind := "status"
-	content := act.Title
-	if obj != nil {
-		if len(obj.Attachments) > 0 {
-			attachment = obj.Attachments[0]
-			kind = attachment.ObjectType
-		}
-		content = obj.Content
-	}
-	if act.Annotation != "" {
+	kind := ""
+	content := ""
+
+	if act.Verb == "share" {
 		content = act.Annotation
+		if content == "" {
+			content = "Resharing " + obj.Actor.DisplayName
+		}
+		kind = "status_share"
+	} else {
+		if obj != nil {
+			if len(obj.Attachments) > 0 {
+				attachment = obj.Attachments[0]
+				kind = attachment.ObjectType
+			}
+			content = obj.Content
+		} else {
+			content = act.Title
+		}
+
 	}
+	content = removeTags(content)
+
 
 	var err os.Error
 
 	switch kind {
 	case "status":
 		// post a status update
-		err = fc.PostStatus(removeTags(content))
+		err = fc.PostStatus(content)
 		return
 	case "article":
 		// post a link
-		err = fc.PostLink(removeTags(content), attachment.Url)
+		err = fc.PostLink(content, attachment.Url)
 	default:
 		if obj != nil {
-			err = fc.PostLink(removeTags(content), obj.Url)
+			err = fc.PostLink(content, obj.Url)
 		}
 	}
 
