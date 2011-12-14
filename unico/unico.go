@@ -53,10 +53,15 @@ func init() {
 	if err != nil {
 		panic("Can't load configuration")
 	}
+	
+	// Make sure every conf option has been completed, except
+	// for AppDomain, because it is useful to test the app with
+	// localhost but some browsers require localhost cookies
+	// to have Domain as ""
 	if appConfig.FacebookAppId == "" || appConfig.FacebookAppSecret == "" ||
 		appConfig.GoogleClientId == "" || appConfig.GoogleClientSecret == "" ||
 		appConfig.TwitterConsumerKey == "" || appConfig.TwitterConsumerSecret == "" ||
-		appConfig.AppHost == "" || appConfig.AppDomain == "" ||
+		appConfig.AppHost == "" ||
 		appConfig.SessionStoreKey == "" {
 		panic("Invalid configuration")
 	}
