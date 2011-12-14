@@ -36,7 +36,8 @@ func loginGoogle(w http.ResponseWriter, r *http.Request) {
 	tr := emptyTransport()
 	c := appengine.NewContext(r)
 	tr.Transport = &urlfetch.Transport{Context: c}
-	http.Redirect(w, r, tr.AuthCodeURL("foo"), http.StatusFound)
+	urls := tr.AuthCodeURL("login") + "&approval_prompt=force&access_type=offline"
+	http.Redirect(w, r, urls, http.StatusFound)
 }
 
 func googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -45,10 +46,10 @@ func googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	tr := emptyTransport()
 	tr.Transport = &urlfetch.Transport{Context: c}
 	if _, err := tr.Exchange(code); err != nil {
+	c.Debugf("tr: %v\n", tr.Token)
 		serveError(c, w, err)
 		return
 	}
-
 	// get info on the user
 	httpClient := tr.Client()
 	p, err := plus.New(httpClient)
@@ -73,10 +74,10 @@ func googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	user := loadUser(r, person.Id)
 	if user.Id == "" {
-		user := &User{Id: person.Id, GoogleAccessToken: tr.Token.AccessToken, GoogleTokenExpiry: tr.Token.TokenExpiry, GoogleRefreshToken: tr.Token.RefreshToken}
+		user = User{Id: person.Id, GoogleAccessToken: tr.Token.AccessToken, GoogleTokenExpiry: tr.Token.TokenExpiry, GoogleRefreshToken: tr.Token.RefreshToken}
 		user.GoogleLatest = time.Nanoseconds()
-		saveUser(r, user)
 	}
+	saveUser(r, &user)
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }
