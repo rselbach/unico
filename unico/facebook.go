@@ -83,8 +83,10 @@ func publishActivityToFacebook(w http.ResponseWriter, r *http.Request, act *plus
 				kind = attachment.ObjectType
 			}
 			content = obj.Content
+			kind = "article"
 		} else {
 			content = act.Title
+			kind = "status"
 		}
 
 	}
