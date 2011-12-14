@@ -141,16 +141,15 @@ func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.
 		}
 		kind = "status_share"
 	} else {
+		kind = "status"
 		if obj != nil {
 			if len(obj.Attachments) > 0 {
 				attachment = obj.Attachments[0]
 				kind = attachment.ObjectType
 			}
 			content = obj.Content
-			kind = "article"
 		} else {
 			content = act.Title
-			kind = "status"
 		}
 
 	}
