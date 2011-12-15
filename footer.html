@@ -1,28 +1,49 @@
 {{define "footer"}}
 
-	</div>
-	<footer>
-	<p>&copy; 2011 <a href="https://raw.github.com/robteix/unico/master/AUTHORS">The Unico Authors</a>.</p>
-	</footer>
+</div>
+<footer>
+  <div class="row">
+    <div class="span8">
+      <p>&copy; 2011 <a href="https://raw.github.com/robteix/unico/master/AUTHORS">The Unico Authors</a>.</p>
+    </div>
+    <div class="span8">
+      <!-- Place this tag in the <head> of your document -->
+      <link href="https://plus.google.com/110974995965669559176" rel="publisher" /><script type="text/javascript">
+	(function() 
+	{var po = document.createElement("script");
+	po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";
+	var s = document.getElementsByTagName("script")[0];
+	s.parentNode.insertBefore(po, s);
+	})();</script>
 
-      </div> <!-- /container -->
-
-
-      <div id="modal-delete" class="modal hide fade">
-	<div class="modal-header">
-	  <a href="#" class="close">x</a>
-	  <h3>Delete Account</h3>
-	</div>
-	<div class="modal-body">
-		<p>Are you sure you want to delete your account? If you continue, your
-		social network account relationships will be lost and sharing will stop.</p>
-	</div>
-	<div class="modal-footer">
-	  <a href="#" class="btn primary">No, don't delete it</a>
-	  <a href="/deleteAccount" class="btn secondary">Yes, delete it!</a>
-	</div>
+      <div style="float: right">
+	<!-- Place this tag where you want the badge to render -->
+	<div class="g-plus"
+	data-href="https://plus.google.com/110974995965669559176"
+	data-size="smallbadge"></div>
       </div>
+    </div>
+  </div>
+</footer>
 
-  </body>
+</div> <!-- /container -->
+
+
+<div id="modal-delete" class="modal hide fade">
+  <div class="modal-header">
+    <a href="#" class="close">x</a>
+    <h3>Delete Account</h3>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to delete your account? If you continue, your
+      social network account relationships will be lost and sharing will stop.</p>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn primary">No, don't delete it</a>
+    <a href="/deleteAccount" class="btn secondary">Yes, delete it!</a>
+  </div>
+</div>
+
+</body>
 </html>
 {{end}}
