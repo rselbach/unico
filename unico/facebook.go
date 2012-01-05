@@ -72,9 +72,9 @@ func publishActivityToFacebook(w http.ResponseWriter, r *http.Request, act *plus
 
 	if act.Verb == "share" {
 		content = act.Annotation
-		if content == "" {
-			content = "Resharing " + obj.Actor.DisplayName
-		}
+		//if content == "" {
+		//	content = "Resharing " + obj.Actor.DisplayName
+		//}
 		kind = "status_share"
 	} else {
 		kind = "status"
