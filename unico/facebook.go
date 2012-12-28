@@ -7,48 +7,46 @@
 package unico
 
 import (
-	"http"
-	"os"
-	"facebooklib"
-	plus "google-api-go-client.googlecode.com/hg/plus/v1"
 	"appengine"
 	"appengine/urlfetch"
+	plus "code.google.com/p/google-api-go-client/plus/v1"
+	"errors"
+	"facebooklib"
+	"net/http"
 
-	"gorilla.googlecode.com/hg/gorilla/sessions"
 )
 
 func fbHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-	id := "" //r.FormValue("id")
+	id := r.FormValue("id")
 
-	if session, err := sessions.Session(r, "", "datastore"); err == nil {
-		id = session["userID"].(string)
-	}
+        if id == "" {
+                serveError(c, w, errors.New("Missing ID Parameter"))
+                return
+        }
 
-	if id == "" {
-		serveError(c, w, os.NewError("Missing ID Parameter"))
-		return
-	}
+        fc := facebooklib.NewFacebookClient(appConfig.FacebookAppId, appConfig.FacebookAppSecret)
+        fc.Transport = &urlfetch.Transport{Context: c}
 
-	fc := facebooklib.NewFacebookClient(appConfig.FacebookAppId, appConfig.FacebookAppSecret)
-	fc.Transport = &urlfetch.Transport{Context: c}
+        code := r.FormValue("code")
+        if code == "" {
 
-	code := r.FormValue("code")
-	if code == "" {
+                http.Redirect(w, r, fc.AuthURL("http://"+appConfig.AppHost+"/fb?id="+id, "offline_access,publish_stream"), http.StatusFound)
+                return
+        }
 
-		http.Redirect(w, r, fc.AuthURL("http://"+appConfig.AppHost+"/fb?id="+id, "offline_access,publish_stream"), http.StatusFound)
-		return
-	}
-
-	fc.RequestAccessToken(code, "http://"+appConfig.AppHost+"/fb?id="+id)
-	user := loadUser(r, id)
+        fc.RequestAccessToken(code, "http://"+appConfig.AppHost+"/fb?id="+id)
+        user := loadUser(r, id)
 	if user.Id == "" {
-		serveError(c, w, os.NewError("Invalid user ID"))
+		serveError(c, w, errors.New("Invalid user ID"))
 		return
 	}
 
 	user.FBAccessToken = fc.AccessToken
-	fbuser, _ := fc.CurrentUser()
+	fbuser, fberr := fc.CurrentUser()
+	if fberr != nil {
+		c.Errorf("fc.CurrentUser() return error: %s\n", fberr)
+	}
 	user.FBId = fbuser.Id
 	user.FBName = fbuser.Name
 	saveUser(r, &user)
@@ -91,15 +89,14 @@ func publishActivityToFacebook(w http.ResponseWriter, r *http.Request, act *plus
 	}
 	content = removeTags(content)
 
-
-	var err os.Error
+	var err error
 
 	switch kind {
 	case "status":
 		// post a status update
 		err = fc.PostStatus(content)
 		return
-	case "article":
+	case "article", "video":
 		// post a link
 		err = fc.PostLink(content, attachment.Url)
 	default:

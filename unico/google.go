@@ -7,14 +7,13 @@
 package unico
 
 import (
-	"http"
+	"net/http"
 	"time"
 
-	"goauth2.googlecode.com/hg/oauth"
-	plus "google-api-go-client.googlecode.com/hg/plus/v1"
 	"appengine"
 	"appengine/urlfetch"
-	"gorilla.googlecode.com/hg/gorilla/sessions"
+	"code.google.com/p/goauth2/oauth"
+	plus "code.google.com/p/google-api-go-client/plus/v1"
 )
 
 func config(host string) *oauth.Config {
@@ -46,7 +45,7 @@ func googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	tr := emptyTransport()
 	tr.Transport = &urlfetch.Transport{Context: c}
 	if _, err := tr.Exchange(code); err != nil {
-	c.Debugf("tr: %v\n", tr.Token)
+		c.Debugf("tr: %v\n", tr.Token)
 		serveError(c, w, err)
 		return
 	}
@@ -63,19 +62,13 @@ func googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		serveError(c, w, err)
 		return
 	}
-	cookie := &http.Cookie{Name: "userId", Value: person.Id, Domain: appConfig.AppDomain, Path: "/", MaxAge: 30000000 /* about a year */ }
+	cookie := &http.Cookie{Name: "userId", Value: person.Id, Domain: appConfig.AppDomain, Path: "/", MaxAge: 30000000 /* about a year */}
 	http.SetCookie(w, cookie)
-
-	if session, err := sessions.Session(r, "", "datastore"); err == nil {
-		session["userID"] = person.Id
-		f := sessions.Save(r, w)
-		c.Debugf("callback: sessionSave: %v\n", f)
-	}
 
 	user := loadUser(r, person.Id)
 	if user.Id == "" {
-		user = User{Id: person.Id, GoogleAccessToken: tr.Token.AccessToken, GoogleTokenExpiry: tr.Token.TokenExpiry, GoogleRefreshToken: tr.Token.RefreshToken}
-		user.GoogleLatest = time.Nanoseconds()
+		user = User{Id: person.Id, GoogleAccessToken: tr.Token.AccessToken, GoogleTokenExpiry: tr.Token.Expiry.UnixNano(), GoogleRefreshToken: tr.Token.RefreshToken}
+		user.GoogleLatest = time.Now().UnixNano()
 	}
 	saveUser(r, &user)
 
@@ -84,7 +77,7 @@ func googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 func transport(user User) *oauth.Transport {
 	return &oauth.Transport{
-		Token:     &oauth.Token{AccessToken: user.GoogleAccessToken, RefreshToken: user.GoogleRefreshToken, TokenExpiry: user.GoogleTokenExpiry},
+		Token:     &oauth.Token{AccessToken: user.GoogleAccessToken, RefreshToken: user.GoogleRefreshToken, Expiry: time.Unix(0, user.GoogleTokenExpiry)},
 		Config:    config(appConfig.AppHost),
 		Transport: &urlfetch.Transport{},
 	}

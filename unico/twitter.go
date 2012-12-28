@@ -7,14 +7,14 @@
 package unico
 
 import (
-	"fmt"
-	"http"
-	"os"
-	"tweetlib"
-	plus "google-api-go-client.googlecode.com/hg/plus/v1"
 	"appengine"
 	"appengine/memcache"
 	"appengine/urlfetch"
+	plus "code.google.com/p/google-api-go-client/plus/v1"
+	"errors"
+	"fmt"
+	"net/http"
+	"tweetlib"
 )
 
 var _ = fmt.Println
@@ -27,7 +27,7 @@ func twitterHandler(w http.ResponseWriter, r *http.Request) {
 		twitterVerify(w, r)
 	default:
 		c := appengine.NewContext(r)
-		serveError(c, w, os.NewError("Invalid Action Parameter"))
+		serveError(c, w, errors.New("Invalid Action Parameter"))
 		return
 	}
 }
@@ -38,7 +38,7 @@ func twitterVerify(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
 	if id == "" {
-		serveError(c, w, os.NewError("Missing ID parameter"))
+		serveError(c, w, errors.New("Missing ID parameter"))
 		return
 	}
 
@@ -86,7 +86,7 @@ func signInTwitterHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	id := r.FormValue("id")
 	if id == "" {
-		serveError(c, w, os.NewError("Missing ID parameter"))
+		serveError(c, w, errors.New("Missing ID parameter"))
 		return
 	}
 
@@ -156,7 +156,7 @@ func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.
 	content = removeTags(content)
 
 	c.Debugf("Post (%s):\n\tkind: %s\n\tcontent: %s\n", user.TwitterId, kind, content)
-	var err os.Error
+	var err error
 	switch kind {
 	case "status":
 		// post a status update
@@ -165,6 +165,15 @@ func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.
 		_, err = tl.Tweets.Update(shortenLink(140, content, act.Url)).Do()
 	case "article":
 		// post a link
+	        c.Debugf("Article (%s):\n\tcontent: %s\n\turl: %s\n", user.TwitterId, content, attachment.Url)
+
+		if (content == attachment.Url || content == "") {
+			if attachment.DisplayName != "" {
+				content = attachment.DisplayName
+			} else {
+				content = "Shared a link."
+			}
+		}
 		_, err = tl.Tweets.Update(shortenLink(140, content, attachment.Url)).Do()
 	default:
 		if obj != nil {

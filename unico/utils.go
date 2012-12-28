@@ -8,8 +8,7 @@ package unico
 
 import (
 	"html"
-	"http"
-	"os"
+	"net/http"
 	"regexp"
 	"time"
 
@@ -28,7 +27,6 @@ var (
 // 2. convert <br/> to new line
 // 3. strip all tags
 
-
 func removeTags(str string) string {
 	str = reParagraphs.ReplaceAllString(str, "\n")
 	str = reBreaks.ReplaceAllString(str, "\n")
@@ -38,13 +36,13 @@ func removeTags(str string) string {
 func serve404(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNotFound)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	templates.Execute(w, "404", nil)
+	templates.ExecuteTemplate(w, "404", nil)
 }
 
-func serveError(c appengine.Context, w http.ResponseWriter, err os.Error) {
+func serveError(c appengine.Context, w http.ResponseWriter, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	templates.Execute(w, "error", err)
+	templates.ExecuteTemplate(w, "error", err)
 	c.Errorf("serveError: %v\n", err)
 }
 
@@ -64,13 +62,13 @@ func loadUser(r *http.Request, id string) User {
 	return user
 }
 
-func saveUser(r *http.Request, user *User) os.Error {
+func saveUser(r *http.Request, user *User) error {
 	c := appengine.NewContext(r)
 
 	a := user.Active
-	user.Active = (user.FBId != "" || user.TwitterId != "")
+	user.enableIfNeeded()
 	if user.Active != a && user.Active { // user just enabled
-		user.GoogleLatest = time.Nanoseconds()
+		user.GoogleLatest = time.Now().UnixNano()
 	}
 	memcache.JSON.Set(c, &memcache.Item{Key: "user" + user.Id, Object: *user})
 	key := datastore.NewKey(c, "User", user.Id, 0, nil)
@@ -93,5 +91,5 @@ func memUserSave(c appengine.Context, id string, mu MemoryUser) {
 }
 
 func memUserDelete(c appengine.Context, id string) {
-	memcache.Delete(c, "memuser" + id)
+	memcache.Delete(c, "memuser"+id)
 }

@@ -23,6 +23,11 @@ type User struct {
 	TwitterId          string
 	TwitterSinceId     string
 
+	// app.net
+	ADNAccessToken string
+	ADNScreenName string
+	ADNId string
+
 	//FB Info
 	FBAccessToken string
 	FBName        string
@@ -39,6 +44,10 @@ func (user *User) HasTwitter() bool {
 	return (user.TwitterId != "")
 }
 
+func (user *User) HasADN() bool {
+	return (user.ADNId != "")
+}
+
 func (user *User) DisableTwitter() {
 	user.TwitterId = ""
 	user.TwitterOAuthSecret = ""
@@ -52,6 +61,13 @@ func (user *User) DisableFacebook() {
 	user.FBName = ""
 }
 
-func (user *User) disableIfNeeded() {
-	user.Active = (user.FBId == "" && user.TwitterId == "")
+func (user *User) DisableADN() {
+        user.ADNId = ""
+        user.ADNAccessToken = ""
+        user.ADNScreenName = ""
+}
+
+
+func (user *User) enableIfNeeded() {
+	user.Active = (user.FBId != "" || user.TwitterId != "" || user.ADNId != "")
 }

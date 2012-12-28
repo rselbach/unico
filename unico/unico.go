@@ -7,20 +7,17 @@
 package unico
 
 import (
-	"http"
-	"io/ioutil"
-	"json"
-	"template"
-	"tweetlib"
-	"time"
-	plus "google-api-go-client.googlecode.com/hg/plus/v1"
 	"appengine"
 	"appengine/datastore"
 	"appengine/memcache"
 	"appengine/urlfetch"
-
-	appengineSessions "gorilla.googlecode.com/hg/gorilla/appengine/sessions"
-	"gorilla.googlecode.com/hg/gorilla/sessions"
+	plus "code.google.com/p/google-api-go-client/plus/v1"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"text/template"
+	"time"
+	"tweetlib"
 )
 
 var appConfig struct {
@@ -30,18 +27,20 @@ var appConfig struct {
 	GoogleClientSecret    string
 	TwitterConsumerKey    string
 	TwitterConsumerSecret string
+	ADNConsumerKey string
+	ADNConsumerSecret string
 	AppHost               string
 	AppDomain             string
 	SessionStoreKey       string
 }
 
 var (
-	templates = template.SetMust(template.ParseSetFiles(
+	templates,_ = template.ParseFiles(
 		"404.html",
 		"home.html",
 		"header.html",
 		"footer.html",
-		"error.html"))
+		"error.html")
 )
 
 func init() {
@@ -53,7 +52,7 @@ func init() {
 	if err != nil {
 		panic("Can't load configuration")
 	}
-	
+
 	// Make sure every conf option has been completed, except
 	// for AppDomain, because it is useful to test the app with
 	// localhost but some browsers require localhost cookies
@@ -61,21 +60,14 @@ func init() {
 	if appConfig.FacebookAppId == "" || appConfig.FacebookAppSecret == "" ||
 		appConfig.GoogleClientId == "" || appConfig.GoogleClientSecret == "" ||
 		appConfig.TwitterConsumerKey == "" || appConfig.TwitterConsumerSecret == "" ||
-		appConfig.AppHost == "" ||
-		appConfig.SessionStoreKey == "" {
+		appConfig.ADNConsumerKey == "" || appConfig.ADNConsumerSecret == "" ||
+		appConfig.AppHost == "" {
 		panic("Invalid configuration")
 	}
 
-	// Register the datastore and memcache session stores.
-	sessions.SetStore("datastore", new(appengineSessions.DatastoreSessionStore))
-	sessions.SetStore("memcache", new(appengineSessions.MemcacheSessionStore))
-
-	// Set secret keys for the session stores.
-	sessions.SetStoreKeys("datastore", []byte(appConfig.SessionStoreKey))
-	sessions.SetStoreKeys("memcache", []byte(appConfig.SessionStoreKey))
-
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/twitter", twitterHandler)
+	http.HandleFunc("/adnauth", adnHandler)
 	http.HandleFunc("/loginGoogle", loginGoogle)
 	http.HandleFunc("/oauth2callback", googleCallbackHandler)
 	http.HandleFunc("/fb", fbHandler)
@@ -83,7 +75,17 @@ func init() {
 	http.HandleFunc("/deleteAccount", deleteAccountHandler)
 	http.HandleFunc("/deleteFacebook", deleteFacebookHandler)
 	http.HandleFunc("/deleteTwitter", deleteTwitterHandler)
+	http.HandleFunc("/deleteADN", deleteADNHandler)
 
+}
+
+func loadUserCookie(r *http.Request) (User, error) {
+	userCookie, err := r.Cookie("userId")
+        var user User
+        if err == nil {
+                user = loadUser(r, userCookie.Value)
+        }
+	return user, err
 }
 
 // Displays the home page. 
@@ -103,19 +105,10 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Look for a browser cookie containing the user id
 	// We can use this to load the user information
-	userCookie, err := r.Cookie("userId")
 	var user User
-	if err == nil {
-		user = loadUser(r, userCookie.Value)
-	}
+	user, err := loadUserCookie(r)
 	c.Debugf("loadUser: %v\n", user)
-	if user.Id != "" {
-		if session, err := sessions.Session(r, "", "datastore"); err == nil {
-			session["userID"] = user.Id
-			f := sessions.Save(r, w)
-			c.Debugf("saveSession: %v\n", f)
-		}
-
+	if err == nil {
 		if user.TwitterId != "" {
 
 			item := new(memcache.Item)
@@ -145,6 +138,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
+		params["adnid"] = user.ADNId
+		params["adnname"] = user.ADNScreenName
 		params["twitterid"] = user.TwitterId
 		params["twittername"] = user.TwitterScreenName
 		params["googleid"] = user.Id
@@ -170,7 +165,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	if err := templates.Execute(w, "home", params); err != nil {
+	if err := templates.ExecuteTemplate(w, "home", params); err != nil {
 		serveError(c, w, err)
 		c.Errorf("%v", err)
 		return
@@ -222,7 +217,7 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 
 	for _, act := range activityFeed.Items {
 		published, _ := time.Parse(time.RFC3339, act.Published)
-		nPub := published.Nanoseconds()
+		nPub := published.UnixNano()
 
 		c.Debugf("syncStream: user: %s, nPub: %v, Latest: %v\n", user.Id, nPub, user.GoogleLatest)
 
@@ -232,6 +227,9 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 			}
 			if user.HasTwitter() {
 				publishActivityToTwitter(w, r, act, user)
+			}
+			if user.HasADN() {
+				publishActivityToADN(w, r, act, user)
 			}
 		}
 		if nPub > latest {
@@ -245,64 +243,51 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 }
 
 func deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
+	user, err := loadUserCookie(r)
+	if err != nil {
+		http.Redirect(w, r, "/", http.StatusNotFound)
+		return
+	}
 
-	id := ""
-	session, err := sessions.Session(r, "", "datastore")
-	c1:= appengine.NewContext(r)
-	c1.Debugf("deleteAccount: id=%v, session=%v, err=%v\n", session["userID"], session, err)
-	if err == nil {
-		if session["userID"] != nil {
-		id = session["userID"].(string)
-		}
-	}
-	if id != "" {
-		user := loadUser(r, id)
-		if user.Id != "" {
-			c := appengine.NewContext(r)
-			key := datastore.NewKey(c, "User", user.Id, 0, nil)
-			datastore.Delete(c, key)
-			session["userID"] = ""
-			sessions.Save(r, w)
-			memUserDelete(c, user.Id)
-			memcache.Delete(c, "user" + user.Id)
-			http.SetCookie(w, &http.Cookie{Name: "userId", Value: "", Domain: appConfig.AppDomain, Path: "/", MaxAge: -1})
-		}
-	}
+	c := appengine.NewContext(r)
+	key := datastore.NewKey(c, "User", user.Id, 0, nil)
+	datastore.Delete(c, key)
+	memUserDelete(c, user.Id)
+	memcache.Delete(c, "user"+user.Id)
+	http.SetCookie(w, &http.Cookie{Name: "userId", Value: "", Domain: appConfig.AppDomain, Path: "/", MaxAge: -1})
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 
-	id := ""
-	session, err := sessions.Session(r, "", "datastore")
+	user, err := loadUserCookie(r)
 	if err == nil {
-		c := appengine.NewContext(r)
-		c.Debugf("session: %v\n",  session)
-		id = session["userID"].(string)
+		user.DisableTwitter()
+		saveUser(r, &user)
+		http.Redirect(w, r, "/", http.StatusFound)
 	}
-	if id != "" {
-		user := loadUser(r, id)
-		if user.Id != "" {
-			user.DisableTwitter()
-			saveUser(r, &user)
-		}
-	}
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "/", http.StatusNotFound)
+
+}
+
+func deleteADNHandler(w http.ResponseWriter, r *http.Request) {
+
+        user, err := loadUserCookie(r)
+        if err == nil {
+                user.DisableADN()
+                saveUser(r, &user)
+                http.Redirect(w, r, "/", http.StatusFound)
+        }
+        http.Redirect(w, r, "/", http.StatusNotFound)
+
 }
 
 func deleteFacebookHandler(w http.ResponseWriter, r *http.Request) {
-
-	id := ""
-	session, err := sessions.Session(r, "", "datastore")
-	if err == nil {
-		id = session["userID"].(string)
+	user, err := loadUserCookie(r)
+	if err != nil {
+		http.Redirect(w, r, "/", http.StatusNotFound)
 	}
-	if id != "" {
-		user := loadUser(r, id)
-		if user.Id != "" {
-			user.DisableFacebook()
-			saveUser(r, &user)
-		}
-	}
+	user.DisableFacebook()
+	saveUser(r, &user)
 	http.Redirect(w, r, "/", http.StatusFound)
 }
