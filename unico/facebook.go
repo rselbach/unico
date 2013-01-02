@@ -13,30 +13,29 @@ import (
 	"errors"
 	"github.com/robteix/fblib"
 	"net/http"
-
 )
 
 func fbHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	id := r.FormValue("id")
 
-        if id == "" {
-                serveError(c, w, errors.New("Missing ID Parameter"))
-                return
-        }
+	if id == "" {
+		serveError(c, w, errors.New("Missing ID Parameter"))
+		return
+	}
 
-        fc := fblib.NewFacebookClient(appConfig.FacebookAppId, appConfig.FacebookAppSecret)
-        fc.Transport = &urlfetch.Transport{Context: c}
+	fc := fblib.NewFacebookClient(appConfig.FacebookAppId, appConfig.FacebookAppSecret)
+	fc.Transport = &urlfetch.Transport{Context: c}
 
-        code := r.FormValue("code")
-        if code == "" {
+	code := r.FormValue("code")
+	if code == "" {
 
-                http.Redirect(w, r, fc.AuthURL("http://"+appConfig.AppHost+"/fb?id="+id, "offline_access,publish_stream"), http.StatusFound)
-                return
-        }
+		http.Redirect(w, r, fc.AuthURL("http://"+appConfig.AppHost+"/fb?id="+id, "offline_access,publish_stream"), http.StatusFound)
+		return
+	}
 
-        fc.RequestAccessToken(code, "http://"+appConfig.AppHost+"/fb?id="+id)
-        user := loadUser(r, id)
+	fc.RequestAccessToken(code, "http://"+appConfig.AppHost+"/fb?id="+id)
+	user := loadUser(r, id)
 	if user.Id == "" {
 		serveError(c, w, errors.New("Invalid user ID"))
 		return

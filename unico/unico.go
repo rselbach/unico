@@ -13,11 +13,11 @@ import (
 	"appengine/urlfetch"
 	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"encoding/json"
+	"github.com/robteix/tweetlib"
 	"io/ioutil"
 	"net/http"
 	"text/template"
 	"time"
-	"github.com/robteix/tweetlib"
 )
 
 var appConfig struct {
@@ -27,15 +27,15 @@ var appConfig struct {
 	GoogleClientSecret    string
 	TwitterConsumerKey    string
 	TwitterConsumerSecret string
-	ADNConsumerKey string
-	ADNConsumerSecret string
+	ADNConsumerKey        string
+	ADNConsumerSecret     string
 	AppHost               string
 	AppDomain             string
 	SessionStoreKey       string
 }
 
 var (
-	templates,_ = template.ParseFiles(
+	templates, _ = template.ParseFiles(
 		"404.html",
 		"home.html",
 		"header.html",
@@ -81,10 +81,10 @@ func init() {
 
 func loadUserCookie(r *http.Request) (User, error) {
 	userCookie, err := r.Cookie("userId")
-        var user User
-        if err == nil {
-                user = loadUser(r, userCookie.Value)
-        }
+	var user User
+	if err == nil {
+		user = loadUser(r, userCookie.Value)
+	}
 	return user, err
 }
 
@@ -272,13 +272,13 @@ func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 
 func deleteADNHandler(w http.ResponseWriter, r *http.Request) {
 
-        user, err := loadUserCookie(r)
-        if err == nil {
-                user.DisableADN()
-                saveUser(r, &user)
-                http.Redirect(w, r, "/", http.StatusFound)
-        }
-        http.Redirect(w, r, "/", http.StatusNotFound)
+	user, err := loadUserCookie(r)
+	if err == nil {
+		user.DisableADN()
+		saveUser(r, &user)
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
+	http.Redirect(w, r, "/", http.StatusNotFound)
 
 }
 

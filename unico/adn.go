@@ -12,8 +12,8 @@ import (
 	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"errors"
 	"fmt"
-	"net/http"
 	"github.com/robteix/adnlib"
+	"net/http"
 )
 
 var _ = fmt.Println
@@ -40,7 +40,7 @@ func adnVerify(w http.ResponseWriter, r *http.Request) {
 	conf := &adnlib.Config{
 		ConsumerKey:    appConfig.ADNConsumerKey,
 		ConsumerSecret: appConfig.ADNConsumerSecret,
-		Callback: "http://" + appConfig.AppDomain + "/adnauth?id=" + id}
+		Callback:       "http://" + appConfig.AppDomain + "/adnauth?id=" + id}
 	tok := &adnlib.Token{}
 	tr := &adnlib.Transport{Config: conf,
 		Token:     tok,
@@ -144,9 +144,9 @@ func publishActivityToADN(w http.ResponseWriter, r *http.Request, act *plus.Acti
 		_, err = tl.Stream.Post(adnShortenLink(140, content, act.Url)).Do()
 	case "article":
 		// post a link
-	        c.Debugf("Article (%s):\n\tcontent: %s\n\turl: %s\n", user.ADNId, content, attachment.Url)
+		c.Debugf("Article (%s):\n\tcontent: %s\n\turl: %s\n", user.ADNId, content, attachment.Url)
 
-		if (content == attachment.Url || content == "") {
+		if content == attachment.Url || content == "" {
 			if attachment.DisplayName != "" {
 				content = attachment.DisplayName
 			} else {
@@ -169,7 +169,7 @@ func publishActivityToADN(w http.ResponseWriter, r *http.Request, act *plus.Acti
 
 func adnShortenLink(max int, content, url string) string {
 	// maximum size for the context itself
-	contentMax := max - len(url) - 1;
+	contentMax := max - len(url) - 1
 	if len(content) <= contentMax {
 		return content + " " + url
 	}
@@ -181,7 +181,7 @@ func adnShorten(max int, content, url string) string {
 		return content
 	}
 	// maximum size for the context itself
-	contentMax := max - len(url) - 1;
+	contentMax := max - len(url) - 1
 	// leave 25 for URL (adnShortened by adn)
 	return content[:contentMax] + " " + url
 }

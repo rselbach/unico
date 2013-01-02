@@ -25,8 +25,8 @@ type User struct {
 
 	// app.net
 	ADNAccessToken string
-	ADNScreenName string
-	ADNId string
+	ADNScreenName  string
+	ADNId          string
 
 	//FB Info
 	FBAccessToken string
@@ -62,11 +62,10 @@ func (user *User) DisableFacebook() {
 }
 
 func (user *User) DisableADN() {
-        user.ADNId = ""
-        user.ADNAccessToken = ""
-        user.ADNScreenName = ""
+	user.ADNId = ""
+	user.ADNAccessToken = ""
+	user.ADNScreenName = ""
 }
-
 
 func (user *User) enableIfNeeded() {
 	user.Active = (user.FBId != "" || user.TwitterId != "" || user.ADNId != "")
