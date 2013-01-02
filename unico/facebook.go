@@ -11,7 +11,7 @@ import (
 	"appengine/urlfetch"
 	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"errors"
-	"facebooklib"
+	"github.com/robteix/fblib"
 	"net/http"
 
 )
@@ -25,7 +25,7 @@ func fbHandler(w http.ResponseWriter, r *http.Request) {
                 return
         }
 
-        fc := facebooklib.NewFacebookClient(appConfig.FacebookAppId, appConfig.FacebookAppSecret)
+        fc := fblib.NewFacebookClient(appConfig.FacebookAppId, appConfig.FacebookAppSecret)
         fc.Transport = &urlfetch.Transport{Context: c}
 
         code := r.FormValue("code")
@@ -57,7 +57,7 @@ func fbHandler(w http.ResponseWriter, r *http.Request) {
 
 func publishActivityToFacebook(w http.ResponseWriter, r *http.Request, act *plus.Activity, user *User) {
 	c := appengine.NewContext(r)
-	fc := facebooklib.NewFacebookClient(appConfig.FacebookAppId, appConfig.FacebookAppSecret)
+	fc := fblib.NewFacebookClient(appConfig.FacebookAppId, appConfig.FacebookAppSecret)
 	fc.Transport = &urlfetch.Transport{Context: c}
 	fc.AccessToken = user.FBAccessToken
 
@@ -105,7 +105,7 @@ func publishActivityToFacebook(w http.ResponseWriter, r *http.Request, act *plus
 		}
 	}
 
-	if err == facebooklib.ErrOAuth {
+	if err == fblib.ErrOAuth {
 		user.DisableFacebook()
 		saveUser(r, user)
 	}

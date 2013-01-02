@@ -13,7 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"adnlib"
+	"github.com/robteix/adnlib"
 )
 
 var _ = fmt.Println

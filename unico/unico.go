@@ -17,7 +17,7 @@ import (
 	"net/http"
 	"text/template"
 	"time"
-	"tweetlib"
+	"github.com/robteix/tweetlib"
 )
 
 var appConfig struct {

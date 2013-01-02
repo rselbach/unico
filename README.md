@@ -14,7 +14,7 @@ by including the source code for the libraries in the app root directory.
 
 The libraries expected are:
 
-* `facebooklib/` - from https://github.com/robteix/fblib
+* `fblib/` - from https://github.com/robteix/fblib
 * `goauth2.googlecode.com/hg/oauth/` - from http://code.google.com/p/goauth2/
 * `google-api-go-client.googlecode.com/hg/google-api/`
    from http://code.google.com/p/google-api-go-client/
