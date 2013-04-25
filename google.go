@@ -24,6 +24,7 @@ func config(host string) *oauth.Config {
 		AuthURL:      "https://accounts.google.com/o/oauth2/auth",
 		TokenURL:     "https://accounts.google.com/o/oauth2/token",
 		RedirectURL:  "http://" + host + "/oauth2callback",
+		AccessType:   "offline",
 	}
 }
 
@@ -35,7 +36,7 @@ func loginGoogle(w http.ResponseWriter, r *http.Request) {
 	tr := emptyTransport()
 	c := appengine.NewContext(r)
 	tr.Transport = &urlfetch.Transport{Context: c}
-	urls := tr.AuthCodeURL("login") + "&approval_prompt=force&access_type=offline"
+	urls := tr.AuthCodeURL("login")
 	http.Redirect(w, r, urls, http.StatusFound)
 }
 
