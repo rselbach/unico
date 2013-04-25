@@ -15,7 +15,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"robteix/v1/tweetlib"
+	"robteix.com/v1/tweetlib"
 	"text/template"
 	"time"
 )

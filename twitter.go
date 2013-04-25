@@ -14,7 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"robteix/v1/tweetlib"
+	"robteix.com/v1/tweetlib"
 )
 
 var _ = fmt.Println
