@@ -1,8 +1,8 @@
 // unico - Send Google+ activities to other networks
 //
 // Copyright 2011 The Unico Authors.  All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Use of this source code is governed by the Simplified
+// BSD license that can be found in the LICENSE file.
 
 package unico
 
