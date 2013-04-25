@@ -9,19 +9,23 @@ Libraries
 ---------
 
 Unico uses a few external libraries and due to the way Google App Engine deals
-with this, you'll need to deploy those along with the app. This is done
-by including the source code for the libraries in the app root directory.
+with this, you'll need to deploy those along with the app. As of version
+1.7.4 of Google Appengine SDK, the `$GOPATH` environment variable is respected
+so you can install the libraries as usual with `go get`.
 
 The libraries expected are:
 
-* `fblib/` - from https://github.com/robteix/fblib
-* `goauth2.googlecode.com/hg/oauth/` - from http://code.google.com/p/goauth2/
-* `google-api-go-client.googlecode.com/hg/google-api/`
-   from http://code.google.com/p/google-api-go-client/
-* `google-api-go-client.googlecode.com/hg/plus/`
-   from http://code.google.com/p/google-api-go-client/
-* `tweetlib/` - from https://github.com/robteix/tweetlib
+* robteix.com/v1/fblib
+* robteix.com/v1/tweetlib
+* robteix.com/v1/adnlib
+* code.google.com/p/goauth2/oauth
+* code.google.com/p/google-api-go-client
 
+Simply `go get` them and you should be fine. For example:
+
+    go get robteix/v1/tweetlib
+    go get code.google.com/p/goauth2/oauth
+    ...
 
 Setting it up
 -------------
