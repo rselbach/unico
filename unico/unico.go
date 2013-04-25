@@ -36,11 +36,11 @@ var appConfig struct {
 
 var (
 	templates, _ = template.ParseFiles(
-		"404.html",
-		"home.html",
-		"header.html",
-		"footer.html",
-		"error.html")
+		"templates/404.html",
+		"templates/home.html",
+		"templates/header.html",
+		"templates/footer.html",
+		"templates/error.html")
 )
 
 func init() {
