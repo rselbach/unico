@@ -13,7 +13,7 @@ import (
 	"appengine/urlfetch"
 	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"encoding/json"
-	"github.com/robteix/tweetlib"
+	"robteix/v1/tweetlib"
 	"io/ioutil"
 	"net/http"
 	"text/template"
