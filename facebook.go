@@ -11,7 +11,7 @@ import (
 	"appengine/urlfetch"
 	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"errors"
-	"github.com/robteix/fblib"
+	"robteix.com/v1/fblib"
 	"net/http"
 )
 
