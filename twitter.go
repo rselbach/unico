@@ -165,9 +165,9 @@ func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.
 		_, err = tl.Tweets.Update(shortenLink(140, content, act.Url)).Do()
 	case "article":
 		// post a link
-	        c.Debugf("Article (%s):\n\tcontent: %s\n\turl: %s\n", user.TwitterId, content, attachment.Url)
+		c.Debugf("Article (%s):\n\tcontent: %s\n\turl: %s\n", user.TwitterId, content, attachment.Url)
 
-		if (content == attachment.Url || content == "") {
+		if content == attachment.Url || content == "" {
 			if attachment.DisplayName != "" {
 				content = attachment.DisplayName
 			} else {

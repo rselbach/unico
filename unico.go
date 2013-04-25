@@ -13,9 +13,9 @@ import (
 	"appengine/urlfetch"
 	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"encoding/json"
-	"robteix/v1/tweetlib"
 	"io/ioutil"
 	"net/http"
+	"robteix/v1/tweetlib"
 	"text/template"
 	"time"
 )
@@ -88,7 +88,7 @@ func loadUserCookie(r *http.Request) (User, error) {
 	return user, err
 }
 
-// Displays the home page. 
+// Displays the home page.
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if appConfig.AppHost == "" {
 		appConfig.AppHost = r.Host
@@ -236,8 +236,15 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 			latest = nPub
 		}
 	}
-	if latest > user.GoogleLatest {
+
+	if latest > user.GoogleLatest ||
+		user.GoogleAccessToken != tr.Token.AccessToken ||
+		user.GoogleRefreshToken != tr.Token.RefreshToken ||
+		user.GoogleTokenExpiry != tr.Token.Expiry.UnixNano() {
 		user.GoogleLatest = latest
+		user.GoogleAccessToken = tr.Token.AccessToken
+		user.GoogleRefreshToken = tr.Token.RefreshToken
+		user.GoogleTokenExpiry = tr.Token.Expiry.UnixNano()
 		saveUser(r, user)
 	}
 }

@@ -11,8 +11,8 @@ import (
 	"appengine/urlfetch"
 	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"errors"
-	"robteix.com/v1/fblib"
 	"net/http"
+	"robteix.com/v1/fblib"
 )
 
 func fbHandler(w http.ResponseWriter, r *http.Request) {
