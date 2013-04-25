@@ -64,7 +64,7 @@ func adnVerify(w http.ResponseWriter, r *http.Request) {
 	user := loadUser(r, id)
 	user.ADNAccessToken = tok.AccessToken
 	user.ADNId = adnTok.Data.User.Id
-	user.ADNScreenName = adnTok.Data.User.Username
+	user.ADNScreenName = adnTok.Data.User.UserName
 	if err := saveUser(r, &user); err != nil {
 		serveError(c, w, err)
 		return
