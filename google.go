@@ -67,9 +67,14 @@ func googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 
 	user := loadUser(r, person.Id)
+
+	user.GoogleAccessToken = tr.Token.AccessToken
+	user.GoogleTokenExpiry = tr.Token.Expiry.UnixNano()
+	user.GoogleRefreshToken = tr.Token.RefreshToken
 	if user.Id == "" {
-		user = User{Id: person.Id, GoogleAccessToken: tr.Token.AccessToken, GoogleTokenExpiry: tr.Token.Expiry.UnixNano(), GoogleRefreshToken: tr.Token.RefreshToken}
+		user.Id = person.Id
 		user.GoogleLatest = time.Now().UnixNano()
+
 	}
 	saveUser(r, &user)
 
