@@ -13,8 +13,11 @@ import (
 	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
-	"robteix.com/v1/tweetlib"
+	"path"
+	"robteix.com/v2/tweetlib"
+	"strings"
 )
 
 var _ = fmt.Println
@@ -64,8 +67,8 @@ func twitterVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tr.Token = tok
-	tl, _ := tweetlib.New(tr.Client())
-	u, err := tl.Account.VerifyCredentials().Do()
+	tl, _ := tweetlib.New(tr)
+	u, err := tl.Account.VerifyCredentials(nil)
 	fmt.Printf("err=%v\n", err)
 	user := loadUser(r, id)
 	user.TwitterOAuthToken = tok.OAuthToken
@@ -127,7 +130,7 @@ func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.
 		Token:     tok,
 		Transport: &urlfetch.Transport{Context: c}}
 
-	tl, _ := tweetlib.New(tr.Client())
+	tl, _ := tweetlib.New(tr)
 
 	var attachment *plus.ActivityObjectAttachments
 	obj := act.Object
@@ -160,9 +163,9 @@ func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.
 	switch kind {
 	case "status":
 		// post a status update
-		_, err = tl.Tweets.Update(shorten(140, content, act.Url)).Do()
+		_, err = tl.Tweets.Update(shorten(c, "status", content, act.Url, tl), nil)
 	case "status_share":
-		_, err = tl.Tweets.Update(shortenLink(140, content, act.Url)).Do()
+		_, err = tl.Tweets.Update(shorten(c, "link", content, act.Url, tl), nil)
 	case "article":
 		// post a link
 		c.Debugf("Article (%s):\n\tcontent: %s\n\turl: %s\n", user.TwitterId, content, attachment.Url)
@@ -174,31 +177,95 @@ func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.
 				content = "Shared a link."
 			}
 		}
-		_, err = tl.Tweets.Update(shortenLink(140, content, attachment.Url)).Do()
+		_, err = tl.Tweets.Update(shorten(c, "link", content, attachment.Url, tl), nil)
+	case "photo":
+		// download photo
+		mediaUrl := attachment.FullImage.Url
+		fileName := path.Base(mediaUrl)
+
+		var media []byte
+		item, err := memcache.Get(c, "picture"+mediaUrl)
+		if err != nil {
+			client := urlfetch.Client(c)
+			resp, err := client.Get(attachment.FullImage.Url)
+			c.Debugf("Downloading %s (%v)\n", mediaUrl, err)
+			if err != nil {
+				break
+			}
+			media, err = ioutil.ReadAll(resp.Body)
+			c.Debugf("Reading contents of %s (%v)\n", mediaUrl, err)
+			if err != nil {
+				break
+			}
+			memcache.Add(c, &memcache.Item{Key: "picture" + mediaUrl, Value: media})
+		} else {
+			media = item.Value
+		}
+		// now we post it
+		tweetMedia := &tweetlib.TweetMedia{
+			Filename: fileName,
+			Data:     media}
+		_, err = tl.Tweets.UpdateWithMedia(shorten(c, "media", content, act.Url, tl), tweetMedia, nil)
+		c.Debugf("Tweeting %s (%v)\n", mediaUrl, err)
 	default:
 		if obj != nil {
-			_, err = tl.Tweets.Update(shortenLink(140, content, obj.Url)).Do()
+			_, err = tl.Tweets.Update(shorten(c, "link", content, obj.Url, tl), nil)
 		}
 	}
 
-	if err == tweetlib.ErrOAuth {
-		user.DisableTwitter()
-		saveUser(r, user)
-	}
 	c.Debugf("publishActivityToTwitter(%s): err=%v\n", kind, err)
 }
 
-func shortenLink(max int, content, url string) string {
-	if len(content) < max-25 {
-		return content + " " + url
+// queries twitter.com for the current configuration
+func twitterConf(c appengine.Context, client *tweetlib.Client) *tweetlib.Configuration {
+	var conf *tweetlib.Configuration
+	_, err := memcache.JSON.Get(c, "twitterConfig", conf)
+	if err != nil {
+		conf, err := client.Help.Configuration()
+		if err != nil {
+			return nil
+		}
+		// we have our length, let's cache it
+		// (+1 to account for the space char)
+		memcache.JSON.Set(c, &memcache.Item{Key: "twitterConfig", Object: conf})
 	}
-	return content[:max-25] + " " + url
+	return conf
 }
 
-func shorten(max int, content, url string) string {
-	if len(content) < max {
+func shorten(c appengine.Context, kind, content, url string, tl *tweetlib.Client) string {
+	max := 140
+	conf := twitterConf(c, tl)
+	if conf == nil {
+		// use some reasonable defaults if we could not
+		// query twitter.com
+		conf = &tweetlib.Configuration{
+			CharactersReservedPerMedia: 25,
+			ShortUrlLengthHttps:        25,
+			ShortUrlLength:             24,
+		}
+	}
+	if kind == "media" {
+		// -1 for the space character
+		max = max - conf.CharactersReservedPerMedia - 1
+		kind = "status"
+	}
+
+	if kind == "status" && len(content) <= max {
 		return content
 	}
-	// leave 25 for URL (shortened by twitter)
-	return content[:max-25] + " " + url
+
+	var tcl int
+	if strings.HasPrefix(url, "https:") {
+		tcl = conf.ShortUrlLengthHttps
+	} else {
+		tcl = conf.ShortUrlLength
+	}
+	// add room for a space
+	tcl++
+	// leave room for URL (shortened by twitter)
+	l := max - tcl
+	if l < len(content) {
+		return fmt.Sprintf("%s... %s", content[:l-3], url)
+	}
+	return fmt.Sprintf("%s %s", content, url)
 }

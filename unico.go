@@ -15,7 +15,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"robteix.com/v1/tweetlib"
+	"robteix.com/v2/tweetlib"
 	"text/template"
 	"time"
 )
@@ -107,7 +107,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	// We can use this to load the user information
 	var user User
 	user, err := loadUserCookie(r)
-	c.Debugf("loadUser: %v\n", user)
 	if err == nil {
 		if user.TwitterId != "" {
 
@@ -126,8 +125,10 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 					Token:     tok,
 					Transport: &urlfetch.Transport{Context: c}}
 
-				tl, _ := tweetlib.New(tr.Client())
-				u, err := tl.Users.Show().UserId(user.TwitterId).Do()
+				tl, _ := tweetlib.New(tr)
+				opts := tweetlib.NewOptionals()
+				opts.Add("user_id", user.TwitterId)
+				u, err := tl.User.Show(user.TwitterScreenName, opts)
 				if err == nil {
 					params["pic"] = u.ProfileImageUrl
 					memcache.Add(c, &memcache.Item{Key: "pic" + user.Id, Value: []byte(u.ProfileImageUrl)})
@@ -152,7 +153,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			tr.Transport = &urlfetch.Transport{Context: c}
 			p, _ := plus.New(tr.Client())
 			person, err := p.People.Get(user.Id).Do()
-			c.Debugf("Home people get: %v,(%v)\n", person, err)
 			if err == nil {
 				mu.Image = person.Image.Url
 				mu.Name = person.DisplayName
@@ -167,7 +167,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := templates.ExecuteTemplate(w, "home", params); err != nil {
 		serveError(c, w, err)
-		c.Errorf("%v", err)
 		return
 	}
 
@@ -221,6 +220,8 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 
 		c.Debugf("syncStream: user: %s, nPub: %v, Latest: %v\n", user.Id, nPub, user.GoogleLatest)
 
+		baba, _ := json.Marshal(act)
+		c.Debugf("\n\nActivity: %s\n\n", baba)
 		if nPub > user.GoogleLatest {
 			if user.HasFacebook() {
 				publishActivityToFacebook(w, r, act, user)

@@ -18,13 +18,14 @@ import (
 
 func config(host string) *oauth.Config {
 	return &oauth.Config{
-		ClientId:     appConfig.GoogleClientId,
-		ClientSecret: appConfig.GoogleClientSecret,
-		Scope:        plus.PlusMeScope,
-		AuthURL:      "https://accounts.google.com/o/oauth2/auth",
-		TokenURL:     "https://accounts.google.com/o/oauth2/token",
-		RedirectURL:  "http://" + host + "/oauth2callback",
-		AccessType:   "offline",
+		ClientId:       appConfig.GoogleClientId,
+		ClientSecret:   appConfig.GoogleClientSecret,
+		Scope:          plus.PlusMeScope,
+		AuthURL:        "https://accounts.google.com/o/oauth2/auth",
+		TokenURL:       "https://accounts.google.com/o/oauth2/token",
+		RedirectURL:    "http://" + host + "/oauth2callback",
+		AccessType:     "offline",
+		ApprovalPrompt: "force",
 	}
 }
 
@@ -37,6 +38,7 @@ func loginGoogle(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	tr.Transport = &urlfetch.Transport{Context: c}
 	urls := tr.AuthCodeURL("login")
+	c.Debugf("Google AuthCodeURL: %s\n", urls)
 	http.Redirect(w, r, urls, http.StatusFound)
 }
 

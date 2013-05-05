@@ -8,10 +8,13 @@ package unico
 
 import (
 	"appengine"
+	"appengine/memcache"
 	"appengine/urlfetch"
 	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"errors"
+	"io/ioutil"
 	"net/http"
+	"path"
 	"robteix.com/v1/fblib"
 )
 
@@ -95,12 +98,52 @@ func publishActivityToFacebook(w http.ResponseWriter, r *http.Request, act *plus
 		// post a status update
 		err = fc.PostStatus(content)
 		return
+	case "photo":
+		// download photo
+		mediaUrl := attachment.FullImage.Url
+		fileName := path.Base(mediaUrl)
+		var media []byte
+		item, err := memcache.Get(c, "picture"+mediaUrl)
+		if err != nil {
+			client := urlfetch.Client(c)
+			resp, err := client.Get(attachment.FullImage.Url)
+			c.Debugf("Downloading %s (%v)\n", mediaUrl, err)
+			if err != nil {
+				break
+			}
+			media, err := ioutil.ReadAll(resp.Body)
+			c.Debugf("Reading contents of %s (%v)\n", mediaUrl, err)
+			if err != nil {
+				break
+			}
+			memcache.Add(c, &memcache.Item{Key: "picture" + mediaUrl, Value: media})
+		} else {
+			media = item.Value
+		}
+		// now we post it
+		photo := fblib.Photo{
+			Message:  content,
+			Source:   media,
+			FileName: fileName,
+		}
+		err = fc.PostPhoto(photo)
+		c.Debugf("Posting %s to FB (%v)\n", mediaUrl, err)
 	case "article", "video":
 		// post a link
-		err = fc.PostLink(content, attachment.Url)
+		link := fblib.Link{}
+		link.Text = content
+		link.Url = attachment.Url
+		if attachment.FullImage != nil {
+			link.Image = attachment.FullImage.Url
+		}
+		err = fc.PostLink(link)
 	default:
 		if obj != nil {
-			err = fc.PostLink(content, obj.Url)
+			link := fblib.Link{
+				Text: content,
+				Url:  obj.Url,
+			}
+			err = fc.PostLink(link)
 		}
 	}
 
