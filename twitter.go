@@ -1,23 +1,25 @@
-// unico - Send Google+ activities to other networks
+// gplus2others - Send Google+ activities to other networks
 //
-// Copyright 2011 The Unico Authors.  All rights reserved.
+// Copyright 2011 The gplus2others Authors.  All rights reserved.
 // Use of this source code is governed by the Simplified BSD
 // license that can be found in the LICENSE file.
 
-package unico
+package gplus2others
 
 import (
-	"appengine"
-	"appengine/memcache"
-	"appengine/urlfetch"
-	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path"
-	"robteix.com/v2/tweetlib"
 	"strings"
+
+	"google.golang.org/api/plus/v1"
+	"gopkg.in/tweetlib.v2"
+
+	"appengine"
+	"appengine/memcache"
+	"appengine/urlfetch"
 )
 
 var _ = fmt.Println
@@ -67,7 +69,7 @@ func twitterVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tr.Token = tok
-	tl, _ := tweetlib.New(tr)
+	tl, _ := tweetlib.New(tr.Client())
 	u, err := tl.Account.VerifyCredentials(nil)
 	fmt.Printf("err=%v\n", err)
 	user := loadUser(r, id)
@@ -130,7 +132,7 @@ func publishActivityToTwitter(w http.ResponseWriter, r *http.Request, act *plus.
 		Token:     tok,
 		Transport: &urlfetch.Transport{Context: c}}
 
-	tl, _ := tweetlib.New(tr)
+	tl, _ := tweetlib.New(tr.Client())
 
 	var attachment *plus.ActivityObjectAttachments
 	obj := act.Object

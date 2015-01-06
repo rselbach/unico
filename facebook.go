@@ -1,21 +1,21 @@
-// unico - Send Google+ activities to other networks
+// gplus2others - Send Google+ activities to other networks
 //
-// Copyright 2011 The Unico Authors.  All rights reserved.
+// Copyright 2011 The gplus2others Authors.  All rights reserved.
 // Use of this source code is governed by the Simplified BSD
 // license that can be found in the LICENSE file.
 
-package unico
+package gplus2others
 
 import (
 	"appengine"
 	"appengine/memcache"
 	"appengine/urlfetch"
-	plus "code.google.com/p/google-api-go-client/plus/v1"
+	plus "google.golang.org/api/plus/v1"
 	"errors"
 	"io/ioutil"
 	"net/http"
 	"path"
-	"robteix.com/v1/fblib"
+	"github.com/robteix/fblib"
 )
 
 func fbHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +33,7 @@ func fbHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
 	if code == "" {
 
-		http.Redirect(w, r, fc.AuthURL("http://"+appConfig.AppHost+"/fb?id="+id, "offline_access,publish_stream"), http.StatusFound)
+		http.Redirect(w, r, fc.AuthURL("http://"+appConfig.AppHost+"/fb?id="+id, "offline_access,publish_actions"), http.StatusFound)
 		return
 	}
 

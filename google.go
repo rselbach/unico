@@ -1,10 +1,10 @@
-// unico - Send Google+ activities to other networks
+// gplus2others - Send Google+ activities to other networks
 //
-// Copyright 2011 The Unico Authors.  All rights reserved.
+// Copyright 2011 The gplus2others Authors.  All rights reserved.
 // Use of this source code is governed by the Simplified BSD
 // license that can be found in the LICENSE file.
 
-package unico
+package gplus2others
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ import (
 	"appengine"
 	"appengine/urlfetch"
 	"code.google.com/p/goauth2/oauth"
-	plus "code.google.com/p/google-api-go-client/plus/v1"
+	plus "google.golang.org/api/plus/v1"
 )
 
 func config(host string) *oauth.Config {
@@ -59,8 +59,9 @@ func googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		serveError(c, w, err)
 		return
 	}
-
+	c.Debugf("get person")
 	person, err := p.People.Get("me").Do()
+	c.Debugf("get person:::::::: %v\n", err)
 	if err != nil {
 		serveError(c, w, err)
 		return

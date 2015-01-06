@@ -1,10 +1,10 @@
-// unico - Send Google+ activities to other networks
+// gplus2others - Send Google+ activities to other networks
 //
-// Copyright 2011 The Unico Authors.  All rights reserved.
+// Copyright 2011 The gplus2others Authors.  All rights reserved.
 // Use of this source code is governed by the Simplified BSD
 // license that can be found in the LICENSE file.
 
-package unico
+package gplus2others
 
 type User struct {
 	Id string
@@ -34,6 +34,9 @@ type User struct {
 	FBId          string
 
 	Active bool
+
+	// Services the user has access to
+//	Services []Services
 }
 
 func (user *User) HasFacebook() bool {

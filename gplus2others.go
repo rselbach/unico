@@ -1,21 +1,21 @@
-// unico - Send Google+ activities to other networks
+// gplus2others - Send Google+ activities to other networks
 //
-// Copyright 2011 The Unico Authors.  All rights reserved.
+// Copyright 2011 The gplus2others Authors.  All rights reserved.
 // Use of this source code is governed by the Simplified BSD
 // license that can be found in the LICENSE file.
 
-package unico
+package gplus2others
 
 import (
 	"appengine"
 	"appengine/datastore"
 	"appengine/memcache"
 	"appengine/urlfetch"
-	plus "code.google.com/p/google-api-go-client/plus/v1"
 	"encoding/json"
+	plus "google.golang.org/api/plus/v1"
+	"gopkg.in/tweetlib.v2"
 	"io/ioutil"
 	"net/http"
-	"robteix.com/v2/tweetlib"
 	"text/template"
 	"time"
 )
@@ -27,8 +27,6 @@ var appConfig struct {
 	GoogleClientSecret    string
 	TwitterConsumerKey    string
 	TwitterConsumerSecret string
-	ADNConsumerKey        string
-	ADNConsumerSecret     string
 	AppHost               string
 	AppDomain             string
 	SessionStoreKey       string
@@ -60,14 +58,12 @@ func init() {
 	if appConfig.FacebookAppId == "" || appConfig.FacebookAppSecret == "" ||
 		appConfig.GoogleClientId == "" || appConfig.GoogleClientSecret == "" ||
 		appConfig.TwitterConsumerKey == "" || appConfig.TwitterConsumerSecret == "" ||
-		appConfig.ADNConsumerKey == "" || appConfig.ADNConsumerSecret == "" ||
 		appConfig.AppHost == "" {
 		panic("Invalid configuration")
 	}
 
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/twitter", twitterHandler)
-	http.HandleFunc("/adnauth", adnHandler)
 	http.HandleFunc("/loginGoogle", loginGoogle)
 	http.HandleFunc("/oauth2callback", googleCallbackHandler)
 	http.HandleFunc("/fb", fbHandler)
@@ -75,7 +71,6 @@ func init() {
 	http.HandleFunc("/deleteAccount", deleteAccountHandler)
 	http.HandleFunc("/deleteFacebook", deleteFacebookHandler)
 	http.HandleFunc("/deleteTwitter", deleteTwitterHandler)
-	http.HandleFunc("/deleteADN", deleteADNHandler)
 
 }
 
@@ -125,7 +120,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 					Token:     tok,
 					Transport: &urlfetch.Transport{Context: c}}
 
-				tl, _ := tweetlib.New(tr)
+				tl, _ := tweetlib.New(tr.Client())
 				opts := tweetlib.NewOptionals()
 				opts.Add("user_id", user.TwitterId)
 				u, err := tl.User.Show(user.TwitterScreenName, opts)
@@ -139,8 +134,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
-		params["adnid"] = user.ADNId
-		params["adnname"] = user.ADNScreenName
 		params["twitterid"] = user.TwitterId
 		params["twittername"] = user.TwitterScreenName
 		params["googleid"] = user.Id
@@ -229,9 +222,6 @@ func syncStream(w http.ResponseWriter, r *http.Request, user *User) {
 			if user.HasTwitter() {
 				publishActivityToTwitter(w, r, act, user)
 			}
-			if user.HasADN() {
-				publishActivityToADN(w, r, act, user)
-			}
 		}
 		if nPub > latest {
 			latest = nPub
@@ -271,18 +261,6 @@ func deleteTwitterHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := loadUserCookie(r)
 	if err == nil {
 		user.DisableTwitter()
-		saveUser(r, &user)
-		http.Redirect(w, r, "/", http.StatusFound)
-	}
-	http.Redirect(w, r, "/", http.StatusNotFound)
-
-}
-
-func deleteADNHandler(w http.ResponseWriter, r *http.Request) {
-
-	user, err := loadUserCookie(r)
-	if err == nil {
-		user.DisableADN()
 		saveUser(r, &user)
 		http.Redirect(w, r, "/", http.StatusFound)
 	}

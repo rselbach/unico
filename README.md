@@ -1,14 +1,14 @@
-Unico
+gplus2others
 =====
 
 Sends public activities from Google+ to Twitter and Facebook.
 
-See it in action: http://unico.robteix.com
+See it in action: http://gplus2others.robteix.com
 
 Libraries
 ---------
 
-Unico uses a few external libraries and due to the way Google App Engine deals
+gplus2others uses a few external libraries and due to the way Google App Engine deals
 with this, you'll need to deploy those along with the app. As of version
 1.7.4 of Google Appengine SDK, the `$GOPATH` environment variable is respected
 so you can install the libraries as usual with `go get`.
@@ -38,12 +38,12 @@ Google+ API. Set up your `redirect_uri` to http://your-domain.com/oauth2callback
 and appropriate alternatives (say http://localhost:8080/oauth2callback)
 
 2. Now go to https://developers.facebook.com/apps and create a new app. This
-is the app that will write on your Facebook wall on behalf of Unico. Again,
+is the app that will write on your Facebook wall on behalf of gplus2others. Again,
 take note of the app ID and Secret.
 
 3. Visit https://dev.twitter.com/apps/new and create a new app. Not
 surprisingly, that's the app that will post to your twitter feed on
-behalf of Unico.
+behalf of gplus2others.
 
 4. Create a file named `config.json` on the app root directory and
 set up **all** of the fields, like this:
@@ -55,8 +55,8 @@ set up **all** of the fields, like this:
          "GoogleClientSecret" : "1fKTqZBAadWyrFM-W3c_J1Pa",
          "TwitterConsumerKey" : "4legr0KASbkS2cyb0RgcsYH",
          "TwitterConsumerSecret" : "bfg69KxZHrs28ZyCeQr3tVoL4qUlggoS0nQyflwa3",
-         "AppHost" : "unico.robteix.com",
-         "AppDomain" : "unico.robteix.com",
+         "AppHost" : "gplus2others.appspot.com",
+         "AppDomain" : "gplus2others.appspot.com",
          "SessionStoreKey" : "some-key-to-encrypt-cookies"
         }
 
@@ -65,7 +65,7 @@ set up **all** of the fields, like this:
 License
 -------
 
-Copyright 2011 The Unico Authors.  All rights reserved.
+Copyright 2011 The gplus2others Authors.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met: 
