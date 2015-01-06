@@ -80,19 +80,6 @@
 
 	    {{end}}
 	   </div>
-	   <div class="span4" {{if .googleid}}{{else}}style="filter: alpha(opacity=10); opacity: 0.1;"{{end}}>
-            <h3>app.net {{if .adnid}}<span class="label success">Sharing</span>{{else}}<span class="label important">Not Sharing</span>{{end}}</h3>
-            {{if .adnid}}
-
-            <p>{{.adnname|html}}<br>
-              <a class="btn smaller" href="/deleteADN">Stop sharing to app.net</a></p>
-
-            {{else}}
-
-            {{if .googleid}}<a href="/adnauth?action=init&id={{.googleid|html}}">{{end}}Sign In with app.net{{if .googleid}}</a>{{end}}
-
-            {{end}}
-          </div>
 
     </div>
 
